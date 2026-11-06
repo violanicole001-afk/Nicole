@@ -1,0 +1,1453 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traditional Houses of the Philippines - Interactive Heritage Scrapbook</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@600;700;800&family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#f7f2e7',
+                        'parchment-dark': '#e8dfcc',
+                        sepia: '#3d2b1f',
+                        ink: '#1d1916',
+                        blueprint: '#0f2b48',
+                        'blueprint-grid': '#1c4975',
+                        terracotta: '#a04828',
+                        bamboo: '#8c7638',
+                        jade: '#2d5a41'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Marcellus', 'serif'],
+                        heading: ['Cinzel', 'serif'],
+                        handwritten: ['Caveat', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Scrapbook Page Style */
+        body {
+            background-color: #f2ebd9;
+            background-image: radial-gradient(#d3c7aa 1px, transparent 1px), radial-gradient(#d3c7aa 1px, #f2ebd9 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: #2c221e;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Visual Mode Overrides */
+        body.mode-blueprint {
+            background-color: #0d233a;
+            background-image: linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 20px 20px, 20px 20px;
+            color: #e2f1ff;
+        }
+
+        body.mode-night {
+            background-color: #121018;
+            background-image: radial-gradient(#2d2538 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: #ece4f5;
+        }
+
+        /* Scrapbook Textured Cards */
+        .paper-card {
+            background: #fbf7ee;
+            box-shadow: 0 10px 25px -5px rgba(61, 43, 31, 0.15), 0 8px 10px -6px rgba(61, 43, 31, 0.1);
+            border: 1px solid #e2d7c3;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease, border-color 0.5s ease;
+        }
+
+        .mode-blueprint .paper-card {
+            background: #133354;
+            border: 1px solid #2f6091;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mode-night .paper-card {
+            background: #1b1724;
+            border: 1px solid #362e47;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Washi Tape Graphic Element */
+        .washi-tape {
+            position: absolute;
+            height: 24px;
+            width: 100px;
+            background: rgba(212, 175, 122, 0.65);
+            backdrop-filter: blur(2px);
+            border-left: 2px dashed rgba(255, 255, 255, 0.5);
+            border-right: 2px dashed rgba(255, 255, 255, 0.5);
+            transform: rotate(-3deg);
+            z-index: 20;
+            top: -12px;
+            left: 30px;
+            pointer-events: none;
+        }
+
+        /* Interactive Capiz Windows & Door Animations */
+        .capiz-window {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .capiz-window.open-left {
+            transform: translateX(-42%);
+        }
+
+        .door-panel {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: left center;
+        }
+        .door-panel.open {
+            transform: perspective(600px) rotateY(-85deg);
+        }
+
+        /* Hotspot Button Animations */
+        .hotspot-pin {
+            animation: pulse-ring 2s infinite;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(160, 72, 40, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(160, 72, 40, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(160, 72, 40, 0); }
+        }
+
+        .mode-blueprint .hotspot-pin {
+            animation: pulse-ring-blue 2s infinite;
+        }
+        @keyframes pulse-ring-blue {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        /* Blueprint Vectors & Night Interior Ambient Glow */
+        .blueprint-overlay, .force-vector {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .mode-blueprint .blueprint-overlay, .mode-blueprint .force-vector {
+            opacity: 1;
+        }
+
+        .interior-glow {
+            opacity: 0.15;
+            transition: opacity 0.5s ease, fill 0.5s ease;
+        }
+        .mode-night .interior-glow {
+            opacity: 0.85;
+            filter: drop-shadow(0px 0px 10px #ffb703);
+        }
+
+        /* Stamp Effect */
+        .heritage-stamp {
+            border: 3px double #a04828;
+            color: #a04828;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            transform: rotate(-5deg);
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b5a48b;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="mode-heritage font-sans min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- NAVIGATION HEADER -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-amber-50/90 dark:bg-stone-900/90 border-b border-amber-900/10 transition-colors duration-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <!-- Branding -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-terracotta text-amber-50 flex items-center justify-center font-heading font-bold text-xl shadow-md">
+                    🇵🇭
+                </div>
+                <div>
+                    <h1 class="font-heading text-lg sm:text-xl font-bold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2">
+                        BAHAY HERITAGE
+                        <span class="text-xs font-handwritten text-terracotta bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded border border-terracotta/30">Scrapbook Edition</span>
+                    </h1>
+                    <p class="text-xs text-stone-600 dark:text-stone-400 font-serif hidden sm:block">Traditional Indigenous & Vernacular Architecture of the Philippines</p>
+                </div>
+            </div>
+
+            <!-- Toolbar / Visual Mode Selector -->
+            <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+                <div class="bg-stone-200/80 dark:bg-stone-800/80 p-1 rounded-xl flex items-center text-xs font-semibold shadow-inner border border-stone-300 dark:border-stone-700">
+                    <button onclick="setVisualMode('heritage')" id="btn-mode-heritage" class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all bg-white text-stone-900 shadow-sm font-bold">
+                        <i class="fa-solid fa-palette text-amber-700"></i>
+                        <span class="hidden md:inline">Heritage</span>
+                    </button>
+                    <button onclick="setVisualMode('blueprint')" id="btn-mode-blueprint" class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-stone-600 dark:text-stone-300 hover:text-stone-900">
+                        <i class="fa-solid fa-compass-drafting text-sky-500"></i>
+                        <span class="hidden md:inline">Blueprint</span>
+                    </button>
+                    <button onclick="setVisualMode('night')" id="btn-mode-night" class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-stone-600 dark:text-stone-300 hover:text-stone-900">
+                        <i class="fa-solid fa-moon text-amber-400"></i>
+                        <span class="hidden md:inline">Night Lantern</span>
+                    </button>
+                </div>
+
+                <!-- Web Audio Sound Ambience Toggle -->
+                <button onclick="toggleAudio()" id="btn-audio" class="p-2.5 rounded-xl bg-stone-200/80 dark:bg-stone-800/80 hover:bg-amber-100 text-stone-700 dark:text-stone-300 text-sm transition-all border border-stone-300 dark:border-stone-700 flex items-center gap-1.5" title="Toggle Nature Ambient Sound">
+                    <i class="fa-solid fa-volume-xmark id-audio-icon"></i>
+                    <span class="text-xs font-medium hidden lg:inline">Ambience</span>
+                </button>
+
+                <!-- Educational Quiz Tab Button -->
+                <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="px-3 py-2 rounded-xl bg-terracotta hover:bg-amber-800 text-amber-50 text-xs font-bold transition-all shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Cultural Quiz</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- VIEW TAB 1: HERITAGE SCRAPBOOK EXPLORER -->
+        <div id="view-explorer" class="space-y-6">
+
+            <!-- Filter Controls Toolbar -->
+            <div class="paper-card p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="washi-tape"></div>
+
+                <!-- Search Input -->
+                <div class="relative w-full md:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs"></i>
+                    <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search house, material, region..." class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-stone-300 dark:border-stone-700 bg-white/80 dark:bg-stone-900/60 focus:outline-none focus:ring-2 focus:ring-terracotta">
+                </div>
+
+                <!-- Region Filter Pill Buttons -->
+                <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 text-xs">
+                    <span class="font-serif font-semibold text-stone-500 mr-1 text-xs">Region:</span>
+                    <button onclick="filterRegion('all')" class="filter-reg-btn active-filter px-3 py-1 rounded-full bg-stone-900 text-white font-medium transition" data-reg="all">All</button>
+                    <button onclick="filterRegion('Luzon')" class="filter-reg-btn px-3 py-1 rounded-full bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300 font-medium transition hover:bg-stone-300" data-reg="Luzon">Luzon</button>
+                    <button onclick="filterRegion('Visayas')" class="filter-reg-btn px-3 py-1 rounded-full bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300 font-medium transition hover:bg-stone-300" data-reg="Visayas">Visayas</button>
+                    <button onclick="filterRegion('Mindanao')" class="filter-reg-btn px-3 py-1 rounded-full bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300 font-medium transition hover:bg-stone-300" data-reg="Mindanao">Mindanao</button>
+                </div>
+
+                <!-- Structure Type Filter -->
+                <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto text-xs">
+                    <span class="font-serif font-semibold text-stone-500 mr-1 text-xs">Type:</span>
+                    <select id="type-select" onchange="filterType(this.value)" class="bg-white dark:bg-stone-900 text-xs border border-stone-300 dark:border-stone-700 rounded-xl px-2.5 py-1.5 focus:outline-none">
+                        <option value="all">All Structures</option>
+                        <option value="Stilt / Timber">Stilt & Timber</option>
+                        <option value="Masonry / Stone">Stone Masonry</option>
+                        <option value="Ancestral Royal">Ancestral / Royal</option>
+                        <option value="Longhouse">Communal Longhouse</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- HOUSE NAVIGATION CAROUSEL -->
+            <div id="house-thumbnails" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <!-- Dynamically loaded house thumbnails -->
+            </div>
+
+            <!-- FEATURED HOUSE CANVAS & DETAILS -->
+            <div id="featured-display" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- LEFT COLUMN: SVG ARTWORK CANVAS (7 Cols) -->
+                <div class="lg:col-span-7 paper-card p-4 sm:p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between min-h-[480px] sm:min-h-[540px]">
+                    <div class="washi-tape"></div>
+
+                    <!-- Canvas Header Info -->
+                    <div class="flex items-center justify-between mb-2 z-10">
+                        <div>
+                            <span id="house-region-badge" class="heritage-stamp text-xs">LUZON • LOWLANDS</span>
+                            <h2 id="house-title-main" class="font-heading text-2xl sm:text-3xl font-bold text-amber-950 dark:text-amber-100 mt-1">Bahay Kubo</h2>
+                            <p id="house-subtitle" class="font-handwritten text-lg text-terracotta dark:text-amber-400">The Icon of Filipino Climate-Adaptive Vernacular Design</p>
+                        </div>
+
+                        <div class="hidden sm:flex flex-col items-end text-right text-xs text-stone-500">
+                            <span class="bg-amber-100/80 dark:bg-amber-950/80 px-2.5 py-1 rounded-lg border border-amber-300/40 flex items-center gap-1.5 text-[11px]">
+                                <i class="fa-solid fa-hand-pointer text-terracotta"></i>
+                                Tap Pins 1–5 to Inspect Features
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- SVG DRAWING DISPLAY CONTAINER -->
+                    <div id="svg-drawing-container" class="relative w-full my-auto py-2 flex items-center justify-center min-h-[320px] sm:min-h-[380px]">
+                        <!-- SVG markup and absolute z-index:999 hotspot overlay button container inserted here -->
+                    </div>
+
+                    <!-- FLOATING INLINE HOTSPOT POPOVER (Positioned directly over/beside canvas) -->
+                    <div id="floating-hotspot-popover" class="hidden absolute z-[1000] max-w-xs sm:max-w-sm w-[90%] sm:w-80 p-4 rounded-2xl bg-amber-50/95 dark:bg-stone-900/95 text-stone-900 dark:text-stone-100 shadow-2xl border-2 border-terracotta backdrop-blur-md transition-all transform scale-95 opacity-0 duration-300">
+                        <div class="flex items-center justify-between pb-2 border-b border-amber-900/20 dark:border-stone-700">
+                            <div class="flex items-center gap-2">
+                                <span id="popover-num-badge" class="w-7 h-7 rounded-full bg-terracotta text-white flex items-center justify-center font-bold text-xs shadow-md">1</span>
+                                <h4 id="popover-title" class="font-serif font-bold text-xs sm:text-sm text-amber-950 dark:text-amber-100">Architectural Feature</h4>
+                            </div>
+                            <button onclick="closePopover()" class="w-6 h-6 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-terracotta hover:text-white flex items-center justify-center text-xs transition">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <p id="popover-desc" class="text-xs text-stone-700 dark:text-stone-300 mt-2.5 leading-relaxed font-sans"></p>
+                        <div id="popover-tip" class="mt-2.5 pt-2 border-t border-amber-900/10 dark:border-stone-800 text-[11px] font-handwritten text-terracotta flex items-center justify-between">
+                            <span>💡 Tap hotspot again or 'X' to close</span>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Footer Guidance -->
+                    <div class="mt-2 pt-3 border-t border-stone-300/40 dark:border-stone-700/40 flex flex-wrap items-center justify-between text-xs text-stone-600 dark:text-stone-400 z-10 gap-2">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-3.5 h-3.5 rounded-full bg-terracotta inline-block"></span> Pins 1–5 (Interactive)</span>
+                            <span class="flex items-center gap-1"><span class="w-3.5 h-3.5 rounded-full bg-amber-400 inline-block"></span> Pin #2 (Window) / #3 (Door)</span>
+                        </div>
+                        <div class="font-handwritten text-sm text-stone-500" id="house-ethno-group">
+                            Ethnolinguistic Origin: Tagalog, Kapampangan, Visayan
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: DETAILED SCRAPBOOK FIELD NOTES & SPECIFICATIONS (5 Cols) -->
+                <div class="lg:col-span-5 space-y-4">
+
+                    <!-- Field Notes Overview -->
+                    <div class="paper-card p-5 rounded-2xl relative">
+                        <div class="washi-tape" style="left: auto; right: 30px; transform: rotate(4deg);"></div>
+                        <h3 class="font-serif font-bold text-lg text-amber-950 dark:text-amber-100 border-b border-stone-300 dark:border-stone-700 pb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-book-open text-terracotta mr-2"></i>Architectural Dossier</span>
+                            <span id="house-period" class="text-xs font-sans font-normal text-stone-500">Pre-Colonial - Present</span>
+                        </h3>
+
+                        <p id="house-description" class="text-xs sm:text-sm text-stone-700 dark:text-stone-300 mt-3 leading-relaxed">
+                            The Bahay Kubo (Nipa Hut) is an iconic stilted indigenous house crafted entirely from local organic materials. Engineered for humid tropical monsoons, its light flexible bamboo frame withstands earthquakes while elevated lantay floors permit cooling airflow.
+                        </p>
+
+                        <!-- Key Specifications Grid -->
+                        <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
+                            <div class="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Primary Framework</span>
+                                <strong id="spec-frame" class="text-stone-800 dark:text-stone-200 font-semibold">Bamboo & Hardwood Posts</strong>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Roofing System</span>
+                                <strong id="spec-roof" class="text-stone-800 dark:text-stone-200 font-semibold">Nipa Thatch Fringe Layers</strong>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Climatic Adaptation</span>
+                                <strong id="spec-climate" class="text-stone-800 dark:text-stone-200 font-semibold">Passive Cross-Ventilation</strong>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Foundation Type</span>
+                                <strong id="spec-foundation" class="text-stone-800 dark:text-stone-200 font-semibold">Raised Wooden Stilts (Poste)</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HOTSPOT DETAIL CARD -->
+                    <div id="hotspot-detail-card" class="paper-card p-5 rounded-2xl relative border-2 border-terracotta/50 transition-all duration-300">
+                        <div class="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
+                            <div class="flex items-center gap-2">
+                                <span id="hotspot-num-badge" class="w-8 h-8 rounded-full bg-terracotta text-white flex items-center justify-center font-bold text-sm shadow-md transition-transform duration-300">1</span>
+                                <h4 id="hotspot-title" class="font-serif font-bold text-stone-900 dark:text-stone-100 text-sm sm:text-base">Nipa Thatch Pyramidal Roof</h4>
+                            </div>
+                            <span class="text-[10px] uppercase px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 font-bold tracking-wider">Architectural Feature</span>
+                        </div>
+                        <p id="hotspot-desc" class="text-xs sm:text-sm text-stone-700 dark:text-stone-300 mt-3 leading-relaxed transition-opacity duration-300">
+                            Click on any numbered circle hotspot pin (1 to 5) on the dwelling illustration to inspect specialized architectural features, cultural symbolism, and construction techniques!
+                        </p>
+                        <div id="hotspot-extra" class="mt-3 p-2.5 rounded-lg bg-amber-50/80 dark:bg-stone-800/40 text-xs text-amber-900 dark:text-amber-200 font-handwritten text-base flex items-center justify-between">
+                            <span>💡 Tip: Pin #2 opens Capiz Windows & Pin #3 opens Door!</span>
+                            <span id="hotspot-status-tag" class="font-sans text-[10px] uppercase tracking-wider font-bold text-terracotta hidden sm:inline">Active Inspector</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW TAB 2: CULTURAL SIGNIFICANCE & QUIZ -->
+        <div id="view-quiz" class="hidden space-y-6">
+            <div class="paper-card p-6 rounded-2xl relative">
+                <div class="washi-tape"></div>
+                
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-stone-300 dark:border-stone-700 pb-4">
+                    <div>
+                        <button onclick="switchTab('explorer')" class="text-xs font-semibold text-terracotta hover:underline mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Scrapbook Explorer
+                        </button>
+                        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-amber-950 dark:text-amber-100">
+                            Educational Heritage & Cultural Adaptation Quiz
+                        </h2>
+                        <p class="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-serif mt-1">
+                            How traditional dwellings help students understand societal adaptation, ecology, and cultural identity.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="px-4 py-2 bg-amber-100 dark:bg-amber-950/80 border border-amber-300/40 rounded-xl text-center">
+                            <span class="block text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Quiz Score</span>
+                            <span id="quiz-score-display" class="text-lg font-bold text-terracotta font-heading">0 / 5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                    <div class="p-4 rounded-xl bg-amber-50/60 dark:bg-stone-800/40 border border-amber-200/60 dark:border-stone-700">
+                        <h4 class="font-serif font-bold text-amber-900 dark:text-amber-200 text-sm mb-1">
+                            <i class="fa-solid fa-seedling text-terracotta mr-1.5"></i> Ecological Wisdom
+                        </h4>
+                        <p class="text-stone-600 dark:text-stone-400 text-xs">
+                            Traditional dwellings utilize zero-carbon local bio-materials (nipa, bamboo, cogon, volcanic stone) suited to microclimates.
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-amber-50/60 dark:bg-stone-800/40 border border-amber-200/60 dark:border-stone-700">
+                        <h4 class="font-serif font-bold text-amber-900 dark:text-amber-200 text-sm mb-1">
+                            <i class="fa-solid fa-users text-terracotta mr-1.5"></i> Social Cohesion (Bayanihan)
+                        </h4>
+                        <p class="text-stone-600 dark:text-stone-400 text-xs">
+                            Structures like the Bahay Kubo were lightweight enough to be moved bodily by neighbors, establishing communal unity.
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-amber-50/60 dark:bg-stone-800/40 border border-amber-200/60 dark:border-stone-700">
+                        <h4 class="font-serif font-bold text-amber-900 dark:text-amber-200 text-sm mb-1">
+                            <i class="fa-solid fa-shield-cat text-terracotta mr-1.5"></i> Climate Resilience
+                        </h4>
+                        <p class="text-stone-600 dark:text-stone-400 text-xs">
+                            From Ivatan typhoon-proof meter-thick limestone walls to Ifugao rat-proof halipan discs, design reflects survival innovation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- QUIZ CONTAINER -->
+                <div class="mt-8 space-y-6 max-w-3xl mx-auto">
+                    <h3 class="font-serif font-bold text-lg text-amber-950 dark:text-amber-100 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-question text-terracotta"></i>
+                        Test Your Vernacular Architecture Knowledge
+                    </h3>
+
+                    <div id="quiz-questions-container" class="space-y-6">
+                        <!-- Questions dynamically loaded via JS -->
+                    </div>
+
+                    <div class="text-center pt-4">
+                        <button onclick="resetQuiz()" class="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow transition">
+                            <i class="fa-solid fa-rotate-right mr-1.5"></i> Reset Quiz Progress
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-12 border-t border-stone-300/40 dark:border-stone-800 py-6 text-center text-xs text-stone-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-serif">Traditional Houses of the Philippines • Interactive Cultural Heritage Scrapbook</p>
+            <p class="mt-1 text-[11px] font-handwritten text-stone-400">Preserving Philippine Vernacular Architecture through Digital Artistry & Interactive Education</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP STATE & HOTSPOT INTERACTION ENGINE -->
+    <script>
+        // --- HOUSES DATASET WITH DETAILED SVG ARTWORK & ABSOLUTE HOTSPOT PIN LOCATIONS ---
+        const housesData = [
+            {
+                id: "bahay-kubo",
+                title: "Bahay Kubo",
+                subtitle: "The Icon of Lowland Climate Adaptation",
+                region: "Luzon",
+                type: "Stilt / Timber",
+                ethno: "Tagalog, Kapampangan, Visayan Lowlands",
+                period: "Pre-Colonial - Contemporary",
+                description: "The Bahay Kubo (Nipa Hut) is a lightweight, elevated stilted dwelling constructed entirely of bamboo, nipa thatch, and rattan lashings. Engineered for high seismic flexibility and monsoon storm runoff, its open slats (lantay) permit continuous passive cross-ventilation.",
+                specs: {
+                    frame: "Hardwood Posts & Bamboo",
+                    roof: "Multi-layered Nipa / Cogon Thatch",
+                    climate: "Max Cross-Ventilation & Seismic Slats",
+                    foundation: "Elevated Bamboo/Hardwood Stilts"
+                },
+                hotspots: [
+                    { id: 1, x: 50, y: 18, title: "Nipa Thatch Roof (Bubong)", desc: "High-pitched steep gable roof woven from palm leaves (nipa/cogon). Rapidly channels tropical monsoon downpours away while creating a high thermal cushion." },
+                    { id: 2, x: 30, y: 48, title: "Sliding Pasamano Capiz Frame (Interactive Window)", desc: "Large sliding bamboo window panels fitted with translucent windowpane oyster shells (capiz) or woven bamboo screens that maximize natural light. Click to slide!" },
+                    { id: 3, x: 70, y: 62, title: "Swinging Bamboo Door & Bulwagan (Interactive Door)", desc: "Main entrance constructed from woven sawali. Leads into the central multi-purpose family living hall (Bulwagan). Click to open door!" },
+                    { id: 4, x: 50, y: 82, title: "Split-Bamboo Floor (Lantay)", desc: "Raised bamboo slats with small gaps between strips. Allows fresh breezes to enter from beneath and enables easy cleaning." },
+                    { id: 5, x: 82, y: 76, title: "Silid / Storage & Batalan Alcove", desc: "Elevated rear platform used for water jar storage (banga) and daily washing, kept separate from the main living quarters." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const windowOffset = windowOpen ? "open-left" : "";
+                    const doorClass = doorOpen ? "open" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="sawali" width="12" height="12" patternUnits="userSpaceOnUse">
+                                <path d="M0 6 L6 0 L12 6 L6 12 Z" fill="none" stroke="#a28551" stroke-width="0.8"/>
+                                <path d="M6 0 L12 6 L6 12 L0 6 Z" fill="#d8be8d" opacity="0.3"/>
+                            </pattern>
+                            <pattern id="nipaThatch" width="20" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M0 10 L10 0 L20 10" fill="none" stroke="#684f28" stroke-width="1.2"/>
+                                <path d="M0 5 L10 -5 L20 5" fill="none" stroke="#8c6f3c" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+
+                        <!-- Background Ambient Landscape -->
+                        <path d="M0 420 Q 200 390 400 410 T 800 400 L 800 500 L 0 500 Z" fill="#7a8c53" opacity="0.5"/>
+                        <path d="M 50 380 Q 20 280 120 260 Q 40 310 50 380" fill="#4a6332"/>
+                        <path d="M 750 380 Q 780 260 680 250 Q 740 300 750 380" fill="#3f542a"/>
+
+                        <!-- BLUEPRINT OVERLAY -->
+                        <g class="blueprint-overlay">
+                            <line x1="100" y1="50" x2="700" y2="50" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4"/>
+                            <text x="400" y="42" fill="#38bdf8" font-size="12" font-family="monospace" text-anchor="middle">ROOF EAVE SPAN: 6.8m</text>
+                            <path d="M 50 280 Q 200 290 350 270" stroke="#00f0ff" stroke-width="2" stroke-dasharray="5,5" class="force-vector"/>
+                            <text x="420" y="440" fill="#00f0ff" font-size="10" font-family="monospace">COOL GROUND AIR CONVECTION</text>
+                        </g>
+
+                        <!-- MAIN STILTS (HALIGI) -->
+                        <g id="stilts">
+                            <rect x="180" y="270" width="18" height="170" fill="#5c4028" rx="3"/>
+                            <rect x="280" y="270" width="16" height="170" fill="#4a3320" rx="3"/>
+                            <rect x="380" y="270" width="18" height="170" fill="#5c4028" rx="3"/>
+                            <rect x="500" y="270" width="16" height="170" fill="#4a3320" rx="3"/>
+                            <rect x="600" y="270" width="18" height="170" fill="#5c4028" rx="3"/>
+                            <line x1="170" y1="310" x2="615" y2="310" stroke="#2b1a0e" stroke-width="5"/>
+                            <line x1="170" y1="380" x2="615" y2="380" stroke="#2b1a0e" stroke-width="4"/>
+                        </g>
+
+                        <!-- INTERIOR ILLUMINATED ROOM -->
+                        <g id="interior-room">
+                            <rect x="220" y="190" width="360" height="110" fill="#1d160e"/>
+                            <circle cx="340" cy="240" r="45" fill="#ffb703" class="interior-glow" />
+                            <path d="M 240 270 L 320 270 L 300 285 L 220 285 Z" fill="#2d1f10"/>
+                            <ellipse cx="500" cy="260" rx="12" ry="16" fill="#0f0b07"/>
+                        </g>
+
+                        <!-- SAWALI WALL -->
+                        <rect x="200" y="180" width="400" height="110" fill="url(#sawali)" stroke="#4a3320" stroke-width="3"/>
+
+                        <!-- CAPIZ SLIDING WINDOW FRAME -->
+                        <g id="window-group">
+                            <rect x="210" y="195" width="220" height="8" fill="#3d2a1a"/>
+                            <rect x="210" y="265" width="220" height="8" fill="#3d2a1a"/>
+                            <g class="capiz-window ${windowOffset}" id="capiz-frame">
+                                <rect x="230" y="200" width="100" height="65" fill="#f4eccd" stroke="#5c4028" stroke-width="3" rx="2"/>
+                                <line x1="255" y1="200" x2="255" y2="265" stroke="#8c6f3c" stroke-width="1.5"/>
+                                <line x1="280" y1="200" x2="280" y2="265" stroke="#8c6f3c" stroke-width="1.5"/>
+                                <line x1="305" y1="200" x2="305" y2="265" stroke="#8c6f3c" stroke-width="1.5"/>
+                                <line x1="230" y1="222" x2="330" y2="222" stroke="#8c6f3c" stroke-width="1.5"/>
+                                <line x1="230" y1="244" x2="330" y2="244" stroke="#8c6f3c" stroke-width="1.5"/>
+                            </g>
+                        </g>
+
+                        <!-- SWINGING DOOR FRAME -->
+                        <g id="door-group">
+                            <rect x="470" y="195" width="70" height="95" fill="#1a1109"/>
+                            <g class="door-panel ${doorClass}" id="door-leaf">
+                                <rect x="470" y="195" width="68" height="95" fill="#8c6f3c" stroke="#3d2b1f" stroke-width="2"/>
+                                <line x1="480" y1="195" x2="480" y2="290" stroke="#5c4028" stroke-width="1.5"/>
+                                <line x1="500" y1="195" x2="500" y2="290" stroke="#5c4028" stroke-width="1.5"/>
+                                <line x1="520" y1="195" x2="520" y2="290" stroke="#5c4028" stroke-width="1.5"/>
+                                <circle cx="530" cy="245" r="3" fill="#d8be8d"/>
+                            </g>
+                        </g>
+
+                        <!-- ROOF STRUCTURE -->
+                        <g id="roof-structure">
+                            <polygon points="400,30 130,200 670,200" fill="#6e5229" stroke="#3d2b1f" stroke-width="3"/>
+                            <polygon points="400,30 160,190 640,190" fill="url(#nipaThatch)"/>
+                            <path d="M 120 200 Q 400 180 680 200 L 690 215 Q 400 190 110 215 Z" fill="#4d371a"/>
+                            <rect x="370" y="20" width="60" height="15" fill="#3d2b1f" rx="4"/>
+                        </g>
+
+                        <!-- BAMBOO LADDER -->
+                        <g id="ladder" stroke="#3d2b1f" stroke-width="2.5">
+                            <line x1="510" y1="285" x2="550" y2="440" stroke="#6e5229" stroke-width="5"/>
+                            <line x1="535" y1="285" x2="575" y2="440" stroke="#6e5229" stroke-width="5"/>
+                            <line x1="518" y1="315" x2="542" y2="315" stroke="#3d2b1f" stroke-width="4"/>
+                            <line x1="525" y1="350" x2="550" y2="350" stroke="#3d2b1f" stroke-width="4"/>
+                            <line x1="532" y1="385" x2="558" y2="385" stroke="#3d2b1f" stroke-width="4"/>
+                            <line x1="540" y1="420" x2="568" y2="420" stroke="#3d2b1f" stroke-width="4"/>
+                        </g>
+                        <ellipse cx="400" cy="445" rx="320" ry="25" fill="#586b39" opacity="0.6"/>
+                    </svg>
+                    `;
+                }
+            },
+            {
+                id: "bahay-na-bato",
+                title: "Bahay na Bato",
+                subtitle: "Colonial Mestizo Architecture Fusion",
+                region: "Luzon",
+                type: "Masonry / Stone",
+                ethno: "Hispanic-Filipino Urban & Provincial Elite",
+                period: "17th - 19th Century Spanish Era",
+                description: "The Bahay na Bato (Stone House) represents the grand synthesis of native Austronesian stilt construction and Spanish colonial stone masonry. The solid ground floor (Silpan) constructed of heavy adobe or coral stone absorbs earthquake tremors, while the wooden upper storey (Zaguan) features sliding Capiz shell windows, louvered ventanillas, and intricate callado fretwork.",
+                specs: {
+                    frame: "Volcanic Adobe Blocks & Heavy Hardwood Upper Frame",
+                    roof: "Clay Tejas Tiles / Corrugated Iron Sheets",
+                    climate: "Louvered Ventanillas & Double Window Tracks",
+                    foundation: "Meter-Thick Mortared Adobe Masonry"
+                },
+                hotspots: [
+                    { id: 1, x: 50, y: 15, title: "Tejas Clay Tile Roof", desc: "Heavy Spanish barrel clay tiles supported by massive molave roof trusses." },
+                    { id: 2, x: 32, y: 38, title: "Sliding Capiz Window & Ventanillas (Interactive Window)", desc: "Translucent oyster shell window grids paired with lower wooden louvered ventanillas that slide open to circulate street breezes. Click to toggle slide!" },
+                    { id: 3, x: 50, y: 72, title: "Double Grand Porte-Cochère Arch Door (Interactive Door)", desc: "Heavy hardwood double door entrance wide enough for horse-drawn carriages (carruajes) to enter. Click to swing door open!" },
+                    { id: 4, x: 70, y: 42, title: "Wrought Iron Barandillas & Callado", desc: "Decorative forged iron balcony grills and pierced wooden ceiling callado fretwork that allow air to circulate across rooms." },
+                    { id: 5, x: 22, y: 70, title: "Chiseled Volcanic Adobe Ground Level", desc: "Thick adobe stone blocks (Silpan) housing carriages, wine cellars, and grain storage." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const windowOffset = windowOpen ? "open-left" : "";
+                    const doorClass = doorOpen ? "open" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="adobeStone" width="30" height="16" patternUnits="userSpaceOnUse">
+                                <rect width="30" height="16" fill="#a89b88" stroke="#6e6252" stroke-width="1"/>
+                                <line x1="0" y1="8" x2="30" y2="8" stroke="#6e6252" stroke-width="1"/>
+                                <line x1="15" y1="0" x2="15" y2="8" stroke="#6e6252" stroke-width="1"/>
+                            </pattern>
+                            <pattern id="tejasRoof" width="16" height="12" patternUnits="userSpaceOnUse">
+                                <path d="M0 0 Q 8 10 16 0" fill="#a04828" stroke="#5e2814" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+
+                        <rect x="0" y="430" width="800" height="70" fill="#786f60"/>
+
+                        <g class="blueprint-overlay">
+                            <rect x="150" y="230" width="500" height="200" stroke="#38bdf8" stroke-width="1" fill="none" stroke-dasharray="4"/>
+                            <text x="400" y="220" fill="#38bdf8" font-size="11" font-family="monospace" text-anchor="middle">ADOBE MASONRY CORE • 1.2m THICK</text>
+                        </g>
+
+                        <!-- GROUND FLOOR MASONRY -->
+                        <rect x="160" y="240" width="480" height="190" fill="url(#adobeStone)" stroke="#3a332a" stroke-width="3"/>
+
+                        <!-- INTERIOR ZAGUAN ROOM -->
+                        <g id="interior-room">
+                            <rect x="180" y="100" width="440" height="130" fill="#1f1810"/>
+                            <circle cx="280" cy="160" r="50" fill="#ffb703" class="interior-glow" />
+                            <rect x="230" y="180" width="40" height="30" fill="#0d0a07"/>
+                        </g>
+
+                        <!-- UPPER WOODEN FLOOR -->
+                        <rect x="150" y="100" width="500" height="140" fill="#5c3a21" stroke="#2d1a0e" stroke-width="3"/>
+
+                        <!-- CALLADO FRETWORK -->
+                        <rect x="180" y="110" width="440" height="15" fill="#3d2412"/>
+                        <circle cx="210" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="250" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="290" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="330" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="370" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="410" cy="117" r="4" fill="#d4af37"/>
+                        <circle cx="450" cy="117" r="4" fill="#d4af37"/>
+
+                        <!-- CAPIZ WINDOWS -->
+                        <g id="window-group-1">
+                            <rect x="200" y="130" width="130" height="85" fill="#2d1f14"/>
+                            <g class="capiz-window ${windowOffset}">
+                                <rect x="200" y="130" width="130" height="85" fill="#fcefb4" stroke="#1f140c" stroke-width="2"/>
+                                <line x1="232" y1="130" x2="232" y2="215" stroke="#a88b48" stroke-width="1.5"/>
+                                <line x1="265" y1="130" x2="265" y2="215" stroke="#a88b48" stroke-width="1.5"/>
+                                <line x1="297" y1="130" x2="297" y2="215" stroke="#a88b48" stroke-width="1.5"/>
+                                <line x1="200" y1="158" x2="330" y2="158" stroke="#a88b48" stroke-width="1.5"/>
+                            </g>
+                        </g>
+
+                        <!-- VENTANILLAS & BARANDILLAS -->
+                        <rect x="200" y="218" width="130" height="18" fill="#1a110a" stroke="#422c1b"/>
+                        <rect x="180" y="222" width="440" height="18" fill="none" stroke="#111" stroke-width="2"/>
+
+                        <!-- PORTE-COCHERE ARCHWAY DOOR -->
+                        <g id="door-group">
+                            <path d="M 340 430 L 340 310 Q 400 260 460 310 L 460 430 Z" fill="#1c1610"/>
+                            <g class="door-panel ${doorClass}">
+                                <path d="M 340 430 L 340 310 Q 400 260 400 310 L 400 430 Z" fill="#3d2412" stroke="#1a0e07" stroke-width="3"/>
+                                <circle cx="360" cy="340" r="3" fill="#000"/>
+                                <circle cx="380" cy="340" r="3" fill="#000"/>
+                            </g>
+                        </g>
+
+                        <!-- TEJAS ROOF -->
+                        <polygon points="400,20 100,100 700,100" fill="url(#tejasRoof)" stroke="#4d1e0d" stroke-width="3"/>
+                    </svg>
+                    `;
+                }
+            },
+            {
+                id: "ifugao-bale",
+                title: "Ifugao Bale",
+                subtitle: "Highland Mortise & Tenon Wonder",
+                region: "Luzon",
+                type: "Stilt / Timber",
+                ethno: "Ifugao Cordillera Peoples",
+                period: "Pre-Colonial Ancestral",
+                description: "The Ifugao Bale is a monumental achievement of indigenous wooden engineering constructed entirely without nails or iron hardware using self-locking mortise-and-tenon joints. Its colossal pyramidal cogon roof overhangs four sturdy posts fitted with wide cylindrical wooden discs (Halipan) designed to prevent rats from climbing into the grain attic.",
+                specs: {
+                    frame: "Hand-hewn Hardwood (Amugawan) Mortise-and-Tenon",
+                    roof: "Thick Layered Cogon Grass Pyramidal Thatch",
+                    climate: "Highland Thermal Retention & Smoke Insulation",
+                    foundation: "Four Heavy Wooden Posts on Sunken Stone Bases"
+                },
+                hotspots: [
+                    { id: 1, x: 50, y: 22, title: "Pyramidal Cogon Thatch Attic (Pelah)", desc: "Steeply angled high-capacity thatch roof housing the sacred rice granary (Pelah) sealed from dampness." },
+                    { id: 2, x: 50, y: 55, title: "Slanted Solid Plank Walls (Gaob)", desc: "Inwardly sloped hand-carved solid wooden wall planks fitted tightly without nails into mortise grooves." },
+                    { id: 3, x: 50, y: 48, title: "Central Entrance Doorway (Interactive Door)", desc: "Main entry opening into the compact living hall. Click to open swinging wooden shutter!" },
+                    { id: 4, x: 30, y: 72, title: "Halipan Wooden Rat-Guard Discs", desc: "Large wheel-shaped wooden discs fitted near the top of the four main stilts to block rodents from reaching the living quarter." },
+                    { id: 5, x: 70, y: 60, title: "Kang-o Carabao Skull Accents", desc: "Carved animal skulls and sacred status symbols mounted on exterior crossbeams denoting wealth and ceremonial feasts." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const doorClass = doorOpen ? "open" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="0,350 250,180 500,350" fill="#4d5e3f" opacity="0.4"/>
+                        <polygon points="300,380 550,150 800,380" fill="#3b4a30" opacity="0.4"/>
+                        <rect x="0" y="420" width="800" height="80" fill="#594d3c"/>
+
+                        <g class="blueprint-overlay">
+                            <circle cx="280" cy="330" r="32" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="3"/>
+                            <text x="280" y="380" fill="#38bdf8" font-size="10" font-family="monospace" text-anchor="middle">HALIPAN RAT-GUARD DISC</text>
+                        </g>
+
+                        <!-- STILTS & HALIPAN DISCS -->
+                        <rect x="270" y="310" width="22" height="120" fill="#3b2616" rx="2"/>
+                        <rect x="508" y="310" width="22" height="120" fill="#3b2616" rx="2"/>
+                        <ellipse cx="281" cy="330" rx="30" ry="12" fill="#6e4727" stroke="#26170d" stroke-width="2"/>
+                        <ellipse cx="519" cy="330" rx="30" ry="12" fill="#6e4727" stroke="#26170d" stroke-width="2"/>
+
+                        <!-- INTERIOR ROOM -->
+                        <g id="interior-room">
+                            <polygon points="260,200 540,200 520,310 280,310" fill="#1f140a"/>
+                            <circle cx="400" cy="250" r="40" fill="#ffb703" class="interior-glow" />
+                        </g>
+
+                        <!-- WALL PLANKS -->
+                        <polygon points="240,190 560,190 520,310 280,310" fill="#5c381c" stroke="#2d1a0c" stroke-width="3"/>
+
+                        <!-- DOORWAY -->
+                        <g id="door-group">
+                            <rect x="375" y="210" width="50" height="85" fill="#120b05"/>
+                            <g class="door-panel ${doorClass}">
+                                <rect x="375" y="210" width="48" height="85" fill="#734723" stroke="#2d1a0c" stroke-width="2"/>
+                                <line x1="390" y1="210" x2="390" y2="295" stroke="#3d2411"/>
+                                <circle cx="415" cy="255" r="3" fill="#d8be8d"/>
+                            </g>
+                        </g>
+
+                        <!-- PYRAMIDAL ROOF -->
+                        <polygon points="400,20 120,220 680,220" fill="#6e5025" stroke="#2d1a0c" stroke-width="3"/>
+                        <line x1="410" y1="310" x2="445" y2="430" stroke="#5c381c" stroke-width="7"/>
+                    </svg>
+                    `;
+                }
+            },
+            {
+                id: "maranao-torogan",
+                title: "Maranao Torogan",
+                subtitle: "Royal Ancestral Palace of Mindanao Kings",
+                region: "Mindanao",
+                type: "Ancestral Royal",
+                ethno: "Maranao People of Lake Lanao",
+                period: "Pre-Colonial - Sultanate Era",
+                description: "The Torogan is the grand ancestral residence of the Sultan or High Datu of the Maranao people. Its defining masterpiece feature is the Panolong—extending wing-like wooden floor beams intricately carved with Okir serpent motifs (Naga) and floral scrolls, resting upon massive unhewn river boulder foundations that absorb earthquake shocks.",
+                specs: {
+                    frame: "Massive Hardwood Posts Resting on River Boulders",
+                    roof: "High-Sloped Layered Bamboo Thatch with Brass Finials",
+                    climate: "Expansive Open Interior Airflow Hall",
+                    foundation: "Free-standing Posts on Natural River Rocks"
+                },
+                hotspots: [
+                    { id: 1, x: 20, y: 52, title: "Winged Panolong Carved Beams", desc: "Elaborately carved dragon/serpent (Naga) and fern scroll (Okir) wooden beams projecting dramatically from the house framework." },
+                    { id: 2, x: 42, y: 44, title: "Lumbang Ribbon Capiz Windows (Interactive Window)", desc: "Long horizontal ribbon windows carved with geometric Okir lattice patterns. Click to slide!" },
+                    { id: 3, x: 68, y: 46, title: "Royal Entrance Door (Interactive Door)", desc: "Main entry into the expansive throne room hall. Click to open swinging door!" },
+                    { id: 4, x: 50, y: 15, title: "Brass Finials & Steep Crown Roof", desc: "Soaring layered thatch roof topped with decorative brass ornaments symbolising regal sovereignty." },
+                    { id: 5, x: 30, y: 88, title: "Unhewn River Boulder Foundations", desc: "Massive tree trunk stilts resting directly on top of smooth river rocks without being buried, allowing the house to sway safely during earthquakes." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const windowOffset = windowOpen ? "open-left" : "";
+                    const doorClass = doorOpen ? "open" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="380" width="800" height="120" fill="#315c6b"/>
+                        <path d="M0 380 Q 200 370 400 380 T 800 370 L 800 500 L 0 500 Z" fill="#234552"/>
+
+                        <!-- RIVER BOULDERS -->
+                        <ellipse cx="230" cy="400" rx="35" ry="18" fill="#75726d" stroke="#3d3b38" stroke-width="2"/>
+                        <ellipse cx="400" cy="405" rx="40" ry="20" fill="#75726d" stroke="#3d3b38" stroke-width="2"/>
+                        <ellipse cx="570" cy="400" rx="35" ry="18" fill="#75726d" stroke="#3d3b38" stroke-width="2"/>
+
+                        <!-- TREE TRUNK POSTS -->
+                        <rect x="215" y="260" width="30" height="140" fill="#4d3019" rx="4"/>
+                        <rect x="385" y="260" width="30" height="145" fill="#4d3019" rx="4"/>
+                        <rect x="555" y="260" width="30" height="140" fill="#4d3019" rx="4"/>
+
+                        <!-- INTERIOR HALL -->
+                        <g id="interior-room">
+                            <rect x="180" y="160" width="440" height="110" fill="#1f1208"/>
+                            <circle cx="340" cy="210" r="45" fill="#ffb703" class="interior-glow" />
+                        </g>
+
+                        <!-- HOUSE BODY & PANOLONG -->
+                        <rect x="180" y="150" width="440" height="120" fill="#805028" stroke="#3b220e" stroke-width="3"/>
+                        <path d="M 180 270 C 100 270 70 230 40 240 C 80 265 110 290 180 285 Z" fill="#a86832" stroke="#3b220e" stroke-width="2"/>
+
+                        <!-- SLIDING WINDOW -->
+                        <g id="window-group">
+                            <rect x="220" y="170" width="220" height="50" fill="#2b1708"/>
+                            <g class="capiz-window ${windowOffset}">
+                                <rect x="220" y="170" width="220" height="50" fill="#fce592" stroke="#4a2a11" stroke-width="2"/>
+                                <line x1="260" y1="170" x2="260" y2="220" stroke="#8a5f27"/>
+                                <line x1="300" y1="170" x2="300" y2="220" stroke="#8a5f27"/>
+                            </g>
+                        </g>
+
+                        <!-- DOOR -->
+                        <g id="door-group">
+                            <rect x="490" y="165" width="55" height="95" fill="#140a03"/>
+                            <g class="door-panel ${doorClass}">
+                                <rect x="490" y="165" width="53" height="95" fill="#a86832" stroke="#3b220e" stroke-width="2"/>
+                                <circle cx="530" cy="215" r="3" fill="#f2ca63"/>
+                            </g>
+                        </g>
+
+                        <!-- ROOF -->
+                        <polygon points="400,30 110,160 690,160" fill="#694321" stroke="#3b220e" stroke-width="3"/>
+                        <path d="M 400 10 L 408 30 L 392 30 Z" fill="#f2ca63" stroke="#b38f2e"/>
+                    </svg>
+                    `;
+                }
+            },
+            {
+                id: "ivatan-sinadumparan",
+                title: "Ivatan Sinadumparan",
+                subtitle: "Typhoon-Proof Stone Fortress of Batanes",
+                region: "Luzon",
+                type: "Masonry / Stone",
+                ethno: "Ivatan People of Batanes Islands",
+                period: "Pre-Colonial - Spanish Era",
+                description: "Built to withstand the fiercest Pacific typhoons and severe earthquakes of northern Batanes, the Sinadumparan features meter-thick walls made of volcanic limestone blocks bound with lime mortar. Its thick cogon thatch roof is reinforced with a heavy braided rope netting (panpet) anchored directly to deep ground pegs.",
+                specs: {
+                    frame: "Meter-Thick Limestone Block Masonry & Heavy Hardwood Rafters",
+                    roof: "Multi-Layered Cogon Netted with Braided Panpet Rope",
+                    climate: "Deep Storm Windows & Massive Thermal Retention",
+                    foundation: "Direct Sunken Limestone Masonry Trenches"
+                },
+                hotspots: [
+                    { id: 1, x: 50, y: 18, title: "Panpet Braided Thatch Netting", desc: "Heavy woven rope netting stretched over thick cogon thatch and anchored to wall pegs to prevent hurricane winds from tearing the roof off." },
+                    { id: 2, x: 32, y: 60, title: "Deep Storm Alcove Window (Interactive Window)", desc: "Small, narrow wooden shuttered windows set deep within thick stone walls to prevent storm spray penetration. Click to slide!" },
+                    { id: 3, x: 62, y: 62, title: "Swinging Hardwood Storm Door (Interactive Door)", desc: "Reinforced thick wooden door positioned facing away from prevailing typhoon wind corridors. Click to open!" },
+                    { id: 4, x: 50, y: 55, title: "Meter-Thick Limestone Masonry", desc: "Quarried limestone boulders bonded with lime-and-sand mortar capable of resisting category 5 typhoon winds." },
+                    { id: 5, x: 50, y: 88, title: "Elevated Stone Pavement (Padron)", desc: "Raised stone apron surrounding the perimeter to channel torrential rain runoff away from foundations." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const windowOffset = windowOpen ? "open-left" : "";
+                    const doorClass = doorOpen ? "open" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="limestone" width="24" height="16" patternUnits="userSpaceOnUse">
+                                <rect width="24" height="16" fill="#aba393" stroke="#696255" stroke-width="1.2"/>
+                            </pattern>
+                        </defs>
+
+                        <path d="M0 360 Q 300 320 800 370 L 800 500 L 0 500 Z" fill="#4d593d"/>
+
+                        <!-- METER-THICK MASONRY -->
+                        <rect x="200" y="200" width="400" height="180" fill="url(#limestone)" stroke="#3b372f" stroke-width="4" rx="2"/>
+
+                        <!-- INTERIOR ROOM -->
+                        <g id="interior-room">
+                            <rect x="470" y="230" width="60" height="120" fill="#17130e"/>
+                            <circle cx="500" cy="280" r="30" fill="#ffb703" class="interior-glow" />
+                        </g>
+
+                        <!-- WINDOW ALCOVE -->
+                        <g class="capiz-window ${windowOffset}">
+                            <rect x="260" y="240" width="50" height="60" fill="#fce592" stroke="#473b2d" stroke-width="3"/>
+                        </g>
+
+                        <!-- STORM DOOR -->
+                        <g id="door-group">
+                            <rect x="470" y="230" width="60" height="120" fill="#140f0b"/>
+                            <g class="door-panel ${doorClass}">
+                                <rect x="470" y="230" width="58" height="120" fill="#523924" stroke="#261a10" stroke-width="2"/>
+                                <circle cx="515" cy="290" r="4" fill="#a8937d"/>
+                            </g>
+                        </g>
+
+                        <!-- NETTED ROOF -->
+                        <polygon points="400,40 160,210 640,210" fill="#755a33" stroke="#2e2211" stroke-width="4"/>
+                        <line x1="220" y1="210" x2="400" y2="40" stroke="#3b2914" stroke-width="2" stroke-dasharray="8,6"/>
+                        <line x1="580" y1="210" x2="400" y2="40" stroke="#3b2914" stroke-width="2" stroke-dasharray="8,6"/>
+                    </svg>
+                    `;
+                }
+            },
+            {
+                id: "tboli-gunu-bong",
+                title: "T'boli Gunu Bong",
+                subtitle: "Communal Longhouse of Lake Sebu",
+                region: "Mindanao",
+                type: "Longhouse",
+                ethno: "T'boli Indigenous People of South Cotabato",
+                period: "Ancestral Indigenous",
+                description: "The Gunu Bong ('Grand House') is the large communal longhouse of the T'boli tribe in Lake Sebu. Housing up to 30 family members, it features extended elevated side platforms (kedung) for weaving sacred T'nalak abaca textiles, multi-tiered thatched roofs, and bamboo walls designed to flex smoothly with mountain winds.",
+                specs: {
+                    frame: "Bamboo & Softwood Stilts bound with Rattan",
+                    roof: "Multi-Tiered Layered Bamboo & Cogon Grass",
+                    climate: "Highland Ridge Ventilation & Elevated Platforms",
+                    foundation: "Staggered Stilts over Sloped Lake Terraces"
+                },
+                hotspots: [
+                    { id: 1, x: 50, y: 15, title: "Multi-tiered Ridge Roof", desc: "Cascading thatch roof tiers that allow smoke from interior cooking hearths to escape effortlessly." },
+                    { id: 2, x: 25, y: 55, title: "Kedung Weaving Platform (Interactive Window)", desc: "Raised side wing platforms illuminated by natural daylight where master weavers create sacred T'nalak abaca cloth patterns inspired by dreams. Click to adjust screen!" },
+                    { id: 3, x: 50, y: 48, title: "Communal Central Entrance (Interactive Door)", desc: "Main central doorway connecting communal living spaces. Click to open swinging door!" },
+                    { id: 4, x: 72, y: 60, title: "Communal Central Hall (Lawa)", desc: "Spacious central floor area accommodating tribal gatherings, epic chant recitations, and brass casting." },
+                    { id: 5, x: 50, y: 88, title: "Staggered Stilt Framework", desc: "Multi-height bamboo stilts accommodating the dramatic sloped terrain of Lake Sebu ridge lines." }
+                ],
+                svg: function(windowOpen, doorOpen) {
+                    const doorClass = doorOpen ? "open" : "";
+                    const windowOffset = windowOpen ? "open-left" : "";
+                    return `
+                    <svg viewBox="0 0 800 500" class="w-full h-auto max-h-[420px] drop-shadow-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 380 C 300 320 500 420 800 360 L 800 500 L 0 500 Z" fill="#385232"/>
+
+                        <!-- STILTS -->
+                        <g stroke="#2b1a0d" stroke-width="2">
+                            <rect x="130" y="280" width="14" height="130" fill="#523821"/>
+                            <rect x="330" y="280" width="14" height="130" fill="#523821"/>
+                            <rect x="570" y="280" width="14" height="130" fill="#523821"/>
+                        </g>
+
+                        <!-- INTERIOR ROOM -->
+                        <g id="interior-room">
+                            <rect x="120" y="180" width="560" height="100" fill="#1c130b"/>
+                            <circle cx="300" cy="230" r="40" fill="#ffb703" class="interior-glow" />
+                        </g>
+
+                        <!-- LONGHOUSE BODY -->
+                        <rect x="110" y="170" width="580" height="110" fill="#8c673b" stroke="#332211" stroke-width="3"/>
+
+                        <!-- WEAVING PLATFORM WINDOW -->
+                        <g class="capiz-window ${windowOffset}">
+                            <rect x="130" y="185" width="80" height="60" fill="#fce592" stroke="#211408" stroke-width="2"/>
+                        </g>
+
+                        <!-- DOORWAY -->
+                        <g id="door-group">
+                            <rect x="380" y="180" width="50" height="90" fill="#120a04"/>
+                            <g class="door-panel ${doorClass}">
+                                <rect x="380" y="180" width="48" height="90" fill="#5e4123" stroke="#211408" stroke-width="2"/>
+                                <circle cx="420" cy="225" r="3" fill="#d9b675"/>
+                            </g>
+                        </g>
+
+                        <!-- MULTI-TIERED ROOF -->
+                        <polygon points="400,50 60,180 740,180" fill="#694d29" stroke="#261b0d" stroke-width="3"/>
+                        <polygon points="400,20 220,90 580,90" fill="#805e33" stroke="#261b0d" stroke-width="2"/>
+                    </svg>
+                    `;
+                }
+            }
+        ];
+
+        // --- CULTURAL QUIZ DATASET ---
+        const quizQuestions = [
+            {
+                q: "Why is the Bahay Kubo engineered with a raised split-bamboo floor (Lantay)?",
+                options: [
+                    "To trap hot air inside the living space",
+                    "To allow cool ground breezes to circulate upwards and enable easy cleaning",
+                    "To store heavy stone sculptures beneath the house",
+                    "To keep wild livestock on the upper floor"
+                ],
+                correct: 1,
+                explanation: "The lantay split-bamboo floor features narrow gaps between slats that allow cool air from under the shade of the stilts to rise naturally through the room."
+            },
+            {
+                q: "What is the primary function of the wooden 'Halipan' discs on the stilts of an Ifugao Bale?",
+                options: [
+                    "They serve as decorative family crests",
+                    "They act as rat-guards preventing rodents from climbing into the grain attic",
+                    "They cushion the house against thunder strikes",
+                    "They measure rainwater accumulation"
+                ],
+                correct: 1,
+                explanation: "The wheel-shaped Halipan wooden discs block rats and small pests from climbing up the four stilts into the sacred rice granary attic."
+            },
+            {
+                q: "How does the Ivatan Sinadumparan house in Batanes withstand severe Category 5 typhoons?",
+                options: [
+                    "By using meter-thick limestone block walls and braided rope netting (panpet) over thatch roofs",
+                    "By floating on water during storm surges",
+                    "By folding its walls down during high winds",
+                    "By building entirely subterranean underground caves"
+                ],
+                correct: 0,
+                explanation: "Ivatan architecture relies on meter-thick quarried limestone masonry bound with lime mortar and braided rope netting stretched across thick cogon thatch."
+            },
+            {
+                q: "What architectural feature defines the royal Maranao Torogan palace?",
+                options: [
+                    "A flat concrete roof garden",
+                    "Extending wing-like wooden floor beams (Panolong) carved with Okir serpent motifs",
+                    "Submerged glass windows facing Lake Lanao",
+                    "Iron spikes surrounding the roof ridge"
+                ],
+                correct: 1,
+                explanation: "The Panolong is the iconic extended floor beam of the Torogan, masterfully carved with Okir Naga (serpent) and floral motifs to signify royal status."
+            },
+            {
+                q: "In colonial 'Bahay na Bato' houses, what purpose do the 'Ventanillas' serve?",
+                options: [
+                    "Sliding low wooden shutter vents beneath main windows that allow air to enter at floor level",
+                    "Secret escape tunnels into the street",
+                    "Glass skylights installed in roofs",
+                    "Heavy iron locks for colonial vaults"
+                ],
+                correct: 0,
+                explanation: "Ventanillas are small louvered wooden vents located directly under the window sills that can be opened to let low-level street breezes cool the floor."
+            }
+        ];
+
+        // --- GLOBAL APP STATE ---
+        let currentHouseIndex = 0;
+        let currentVisualMode = 'heritage';
+        let isCapizOpen = false;
+        let isDoorOpen = false;
+        let selectedHotspotId = 1;
+        let userQuizAnswers = {};
+
+        // Web Audio API Ambient Sound Generator
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let audioGainNode = null;
+
+        // --- APP INITIALIZATION ---
+        window.onload = function() {
+            renderHouseThumbnails();
+            loadHouse(0);
+            renderQuiz();
+        };
+
+        // --- RENDER HOUSE SELECTOR THUMBNAILS ---
+        function renderHouseThumbnails() {
+            const container = document.getElementById('house-thumbnails');
+            container.innerHTML = housesData.map((house, idx) => `
+                <div onclick="loadHouse(${idx})" id="thumb-${idx}" class="paper-card p-2 rounded-xl cursor-pointer text-center transition-all transform hover:-translate-y-1 ${idx === currentHouseIndex ? 'ring-2 ring-terracotta border-terracotta' : 'opacity-80'}">
+                    <div class="h-16 w-full rounded-lg bg-stone-200 dark:bg-stone-800 flex items-center justify-center overflow-hidden mb-1.5">
+                        <span class="text-xl">${getHouseEmoji(house.id)}</span>
+                    </div>
+                    <h4 class="font-serif font-bold text-xs truncate text-stone-900 dark:text-stone-100">${house.title}</h4>
+                    <span class="text-[10px] text-stone-500 font-sans block">${house.region}</span>
+                </div>
+            `).join('');
+        }
+
+        function getHouseEmoji(id) {
+            const icons = {
+                'bahay-kubo': '🌾',
+                'bahay-na-bato': '🏛️',
+                'ifugao-bale': '⛰️',
+                'maranao-torogan': '👑',
+                'ivatan-sinadumparan': '🪨',
+                'tboli-gunu-bong': '🛖'
+            };
+            return icons[id] || '🏠';
+        }
+
+        // --- LOAD SELECTED HOUSE ---
+        function loadHouse(index) {
+            currentHouseIndex = index;
+            const house = housesData[index];
+            isCapizOpen = false;
+            isDoorOpen = false;
+            selectedHotspotId = 1;
+
+            // Update Thumbnails Active Style
+            housesData.forEach((_, idx) => {
+                const el = document.getElementById(`thumb-${idx}`);
+                if (el) {
+                    if (idx === index) {
+                        el.classList.add('ring-2', 'ring-terracotta', 'border-terracotta');
+                        el.classList.remove('opacity-80');
+                    } else {
+                        el.classList.remove('ring-2', 'ring-terracotta', 'border-terracotta');
+                        el.classList.add('opacity-80');
+                    }
+                }
+            });
+
+            // Update Metadata Cards
+            document.getElementById('house-region-badge').innerText = `${house.region.toUpperCase()} • ${house.type.toUpperCase()}`;
+            document.getElementById('house-title-main').innerText = house.title;
+            document.getElementById('house-subtitle').innerText = house.subtitle;
+            document.getElementById('house-description').innerText = house.description;
+            document.getElementById('house-ethno-group').innerText = `Ethnolinguistic Origin: ${house.ethno}`;
+            document.getElementById('house-period').innerText = house.period;
+
+            // Update Specifications
+            document.getElementById('spec-frame').innerText = house.specs.frame;
+            document.getElementById('spec-roof').innerText = house.specs.roof;
+            document.getElementById('spec-climate').innerText = house.specs.climate;
+            document.getElementById('spec-foundation').innerText = house.specs.foundation;
+
+            renderSVGDrawing();
+            showHotspotDetails(1);
+        }
+
+        // --- RENDER SVG & ABSOLUTE HIGH-Z-INDEX OVERLAY HOTSPOT BUTTONS ---
+        function renderSVGDrawing() {
+            const house = housesData[currentHouseIndex];
+            const container = document.getElementById('svg-drawing-container');
+
+            let svgMarkup = house.svg(isCapizOpen, isDoorOpen);
+
+            // Construct absolute HTML buttons over the SVG canvas with z-index: 999
+            let hotspotsMarkup = house.hotspots.map(spot => {
+                const isActive = selectedHotspotId === spot.id;
+                const activeClasses = isActive 
+                    ? 'bg-amber-600 text-white ring-4 ring-amber-300 scale-125 z-[999] shadow-2xl' 
+                    : 'bg-terracotta hover:bg-amber-800 text-amber-50 z-[990] opacity-95';
+
+                return `
+                <button type="button"
+                        onclick="selectHotspot(${spot.id}); event.stopPropagation();"
+                        ontouchstart="selectHotspot(${spot.id}); event.stopPropagation();"
+                        aria-label="Inspect feature ${spot.id}: ${spot.title}"
+                        title="Click to inspect pin #${spot.id}: ${spot.title}"
+                        style="left: ${spot.x}%; top: ${spot.y}%; pointer-events: auto; z-index: 999;"
+                        class="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full ${activeClasses} font-bold text-xs sm:text-sm flex items-center justify-center shadow-xl hotspot-pin border-2 border-white transition-all transform hover:scale-125 focus:outline-none focus:ring-4 focus:ring-amber-400 active:scale-95 cursor-pointer">
+                    ${spot.id}
+                </button>
+            `}).join('');
+
+            container.innerHTML = `
+                <div class="relative w-full h-full flex justify-center items-center overflow-hidden rounded-xl">
+                    <div class="w-full relative">
+                        ${svgMarkup}
+                        <!-- Dedicated High Z-Index Overlay Layer for Buttons -->
+                        <div class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 999;">
+                            ${hotspotsMarkup}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- HOTSPOT CLICK HANDLER & ACTION MECHANICS ---
+        function selectHotspot(id) {
+            // Toggle close if clicking same active hotspot
+            if (selectedHotspotId === id && !document.getElementById('floating-hotspot-popover').classList.contains('hidden')) {
+                closePopover();
+                return;
+            }
+
+            selectedHotspotId = id;
+
+            // Trigger window (#2) or door (#3) toggles
+            if (id === 2) {
+                isCapizOpen = !isCapizOpen;
+            } else if (id === 3) {
+                isDoorOpen = !isDoorOpen;
+            }
+
+            renderSVGDrawing();
+            showFloatingPopover(id);
+            playWoodClickSound();
+        }
+
+        function showFloatingPopover(id) {
+            const house = housesData[currentHouseIndex];
+            const spot = house.hotspots.find(s => s.id === id) || house.hotspots[0];
+
+            const popover = document.getElementById('floating-hotspot-popover');
+            const numBadge = document.getElementById('popover-num-badge');
+            const titleEl = document.getElementById('popover-title');
+            const descEl = document.getElementById('popover-desc');
+
+            if (numBadge) numBadge.innerText = spot.id;
+            if (titleEl) titleEl.innerText = spot.title;
+            if (descEl) descEl.innerText = spot.desc;
+
+            // Calculate anchor positioning over canvas based on hotspot coordinates
+            let topPos = Math.min(Math.max(spot.y - 10, 10), 65);
+            let leftPos = spot.x > 50 ? Math.max(spot.x - 45, 5) : Math.min(spot.x + 5, 55);
+
+            if (window.innerWidth < 640) {
+                // Centered floating card on smaller mobile screens
+                popover.style.top = '15%';
+                popover.style.left = '5%';
+            } else {
+                popover.style.top = `${topPos}%`;
+                popover.style.left = `${leftPos}%`;
+            }
+
+            popover.classList.remove('hidden');
+            setTimeout(() => {
+                popover.classList.remove('scale-95', 'opacity-0');
+                popover.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            // Also synchronize with the side panel dossier
+            showHotspotDetails(id);
+        }
+
+        function closePopover() {
+            const popover = document.getElementById('floating-hotspot-popover');
+            if (popover) {
+                popover.classList.remove('scale-100', 'opacity-100');
+                popover.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    popover.classList.add('hidden');
+                }, 200);
+            }
+        }
+
+        function showHotspotDetails(id) {
+            const house = housesData[currentHouseIndex];
+            const spot = house.hotspots.find(s => s.id === id) || house.hotspots[0];
+
+            const numBadge = document.getElementById('hotspot-num-badge');
+            const titleEl = document.getElementById('hotspot-title');
+            const descEl = document.getElementById('hotspot-desc');
+
+            if (numBadge) numBadge.innerText = spot.id;
+            if (titleEl) titleEl.innerText = spot.title;
+            if (descEl) descEl.innerText = spot.desc;
+        }
+
+        // --- VISUAL MODE SWITCHER ---
+        function setVisualMode(mode) {
+            currentVisualMode = mode;
+            document.body.className = `mode-${mode} font-sans min-h-screen flex flex-col justify-between antialiased`;
+
+            ['heritage', 'blueprint', 'night'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) {
+                    btn.className = 'px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-sm font-bold';
+                } else {
+                    btn.className = 'px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-stone-600 dark:text-stone-300 hover:text-stone-900';
+                }
+            });
+
+            renderSVGDrawing();
+        }
+
+        // --- SEARCH & FILTER FUNCTIONS ---
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filteredIdx = housesData.findIndex(h =>
+                h.title.toLowerCase().includes(query) ||
+                h.region.toLowerCase().includes(query) ||
+                h.ethno.toLowerCase().includes(query) ||
+                h.description.toLowerCase().includes(query)
+            );
+            if (filteredIdx !== -1) {
+                loadHouse(filteredIdx);
+            }
+        }
+
+        function filterRegion(region) {
+            document.querySelectorAll('.filter-reg-btn').forEach(btn => {
+                if (btn.dataset.reg === region) {
+                    btn.className = 'filter-reg-btn px-3 py-1 rounded-full bg-stone-900 text-white font-medium transition';
+                } else {
+                    btn.className = 'filter-reg-btn px-3 py-1 rounded-full bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300 font-medium transition hover:bg-stone-300';
+                }
+            });
+
+            if (region === 'all') return;
+            const targetIdx = housesData.findIndex(h => h.region === region);
+            if (targetIdx !== -1) loadHouse(targetIdx);
+        }
+
+        function filterType(type) {
+            if (type === 'all') return;
+            const targetIdx = housesData.findIndex(h => h.type === type);
+            if (targetIdx !== -1) loadHouse(targetIdx);
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchTab(tab) {
+            if (tab === 'quiz') {
+                document.getElementById('view-explorer').classList.add('hidden');
+                document.getElementById('view-quiz').classList.remove('hidden');
+            } else {
+                document.getElementById('view-quiz').classList.add('hidden');
+                document.getElementById('view-explorer').classList.remove('hidden');
+            }
+        }
+
+        // --- EDUCATIONAL QUIZ ENGINE ---
+        function renderQuiz() {
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = quizQuestions.map((q, qIdx) => `
+                <div class="p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 space-y-3">
+                    <h4 class="font-serif font-bold text-stone-900 dark:text-stone-100 text-sm sm:text-base">
+                        ${qIdx + 1}. ${q.q}
+                    </h4>
+                    <div class="space-y-2">
+                        ${q.options.map((opt, oIdx) => `
+                            <button onclick="answerQuestion(${qIdx}, ${oIdx})" id="q-${qIdx}-opt-${oIdx}" class="w-full text-left p-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs text-stone-800 dark:text-stone-200 hover:bg-amber-50 transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="quiz-explain-${qIdx}" class="hidden p-2.5 rounded-lg text-xs font-serif bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-300/40">
+                        💡 <strong>Explanation:</strong> ${q.explanation}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerQuestion(qIdx, optionIdx) {
+            if (userQuizAnswers[qIdx] !== undefined) return;
+            userQuizAnswers[qIdx] = optionIdx;
+
+            const q = quizQuestions[qIdx];
+            const isCorrect = optionIdx === q.correct;
+
+            q.options.forEach((_, oIdx) => {
+                const btn = document.getElementById(`q-${qIdx}-opt-${oIdx}`);
+                if (oIdx === q.correct) {
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900', 'font-bold');
+                } else if (oIdx === optionIdx && !isCorrect) {
+                    btn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                }
+            });
+
+            document.getElementById(`quiz-explain-${qIdx}`).classList.remove('hidden');
+            calculateScore();
+        }
+
+        function calculateScore() {
+            let score = 0;
+            Object.keys(userQuizAnswers).forEach(qIdx => {
+                if (userQuizAnswers[qIdx] === quizQuestions[qIdx].correct) {
+                    score++;
+                }
+            });
+            document.getElementById('quiz-score-display').innerText = `${score} / ${quizQuestions.length}`;
+        }
+
+        function resetQuiz() {
+            userQuizAnswers = {};
+            document.getElementById('quiz-score-display').innerText = `0 / ${quizQuestions.length}`;
+            renderQuiz();
+        }
+
+        // --- WEB AUDIO API SYNTHESIZER ---
+        function toggleAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isAudioPlaying) {
+                if (audioGainNode) audioGainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                isAudioPlaying = false;
+                document.querySelector('.id-audio-icon').className = 'fa-solid fa-volume-xmark id-audio-icon';
+            } else {
+                audioCtx.resume();
+                playTropicalAmbientNoise();
+                isAudioPlaying = true;
+                document.querySelector('.id-audio-icon').className = 'fa-solid fa-volume-high id-audio-icon text-terracotta';
+            }
+        }
+
+        function playTropicalAmbientNoise() {
+            const bufferSize = audioCtx.sampleRate * 2;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                output[i] *= 0.02;
+                b6 = white * 0.115926;
+            }
+
+            const whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            audioGainNode = audioCtx.createGain();
+            audioGainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+
+            whiteNoise.connect(audioGainNode);
+            audioGainNode.connect(audioCtx.destination);
+            whiteNoise.start();
+        }
+
+        function playWoodClickSound() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.09);
+                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.09);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
+```<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="styles/style.css"/>
+  <title>Hello, World!</title>
+</head>
+<body>
+  <h1>
+    Hello, World!
+  </h1>
+</body>
+</html>
